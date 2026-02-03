@@ -1,21 +1,43 @@
 import { Router } from "express";
+import Booking from "../models/Booking.js";
+import Trip from "../models/Trip.js";
 import { authRequired } from "../middleware/auth.js";
-import { bookings, cancelBooking } from "../store.js";
 
 const r = Router();
 
-r.get("/my", authRequired, (req, res) => {
-  const list = bookings.filter(b => b.userId === req.user.id);
-  res.json(list);
+r.get("/my", authRequired, async (req, res) => {
+  try {
+    const list = await Booking.find({ userId: req.user.id }).populate("tripId");
+    res.json(list);
+  } catch (e) {
+    res.status(500).json({ error: "server_error" });
+  }
 });
 
-r.post("/:id/cancel", authRequired, (req, res) => {
+r.post("/:id/cancel", authRequired, async (req, res) => {
   try {
-    const b = cancelBooking({ bookingId: req.params.id, userId: req.user.id });
+    const b = await Booking.findById(req.params.id);
+    if (!b) return res.status(404).json({ error: "not_found" });
+    
+    if (b.userId.toString() !== req.user.id) return res.status(403).json({ error: "forbidden" });
+
+    if (b.bookingStatus === "cancelled") {
+      return res.json({ booking: b, message: "Already cancelled." });
+    }
+
+    b.bookingStatus = "cancelled";
+    await b.save();
+
+    // Restore seats
+    const trip = await Trip.findById(b.tripId);
+    if (trip) {
+      trip.seatsAvailable += b.numberOfPeople;
+      await trip.save();
+    }
+
     res.json({ booking: b, message: "Your booking has been successfully canceled." });
   } catch (e) {
-    if (e.message === "booking_not_found") return res.status(404).json({ error: "not_found" });
-    if (e.message === "forbidden") return res.status(403).json({ error: "forbidden" });
+    console.error(e);
     res.status(500).json({ error: "server_error" });
   }
 });

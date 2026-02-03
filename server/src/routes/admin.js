@@ -1,26 +1,34 @@
 import { Router } from "express";
 import { roleRequired, authRequired } from "../middleware/auth.js";
-import { sites, trips, users, reviews } from "../store.js";
+import Site from "../models/Site.js";
+import Trip from "../models/Trip.js";
+import User from "../models/User.js";
+import Review from "../models/Review.js";
+import Booking from "../models/Booking.js";
 
 const r = Router();
 
 r.use(authRequired);
 r.use(roleRequired("admin"));
 
-r.get("/sites", (req, res) => {
-  res.json(sites);
+r.get("/sites", async (req, res) => {
+  const list = await Site.find();
+  res.json(list);
 });
 
-r.get("/trips", (req, res) => {
-  res.json(trips);
+r.get("/trips", async (req, res) => {
+  const list = await Trip.find();
+  res.json(list);
 });
 
-r.get("/users", (req, res) => {
-  res.json(users.map(u => ({ id: u.id, email: u.email, role: u.role })));
+r.get("/users", async (req, res) => {
+  const list = await User.find().select("-password");
+  res.json(list);
 });
 
-r.get("/reviews", (req, res) => {
-  res.json(reviews);
+r.get("/reviews", async (req, res) => {
+  const list = await Review.find();
+  res.json(list);
 });
 
 export default r;

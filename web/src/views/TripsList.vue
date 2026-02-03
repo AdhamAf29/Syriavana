@@ -15,7 +15,7 @@
     <h2>الرحلات</h2>
     <div class="grid">
       <div v-for="t in filteredTrips" :key="t.id" :class="['card','trips-card', t.discount?.active ? 'offer-card' : '']">
-        <div class="header"><h3 class="card-title">رحلة {{ num(t) }}</h3></div>
+        <div class="header"><h3 class="card-title">{{ t.title }}</h3></div>
         <div class="card-media">
           <img class="card-img" :src="t.images?.[0] || ''" alt="" />
         </div>

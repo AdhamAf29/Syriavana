@@ -1,30 +1,41 @@
 import { Router } from "express";
 import { authRequired } from "../middleware/auth.js";
-import { addFavorite, removeFavorite, users } from "../store.js";
+import User from "../models/User.js";
 
 const r = Router();
 
-r.post("/:id/favorites", authRequired, (req, res) => {
+r.post("/:id/favorites", authRequired, async (req, res) => {
   const { siteId, action } = req.body || {};
   if (!siteId) return res.status(400).json({ error: "invalid_input" });
   if (req.user.id !== req.params.id && req.user.role !== "admin") return res.status(403).json({ error: "forbidden" });
+
   try {
+    let update;
     if (action === "remove") {
-      const u = removeFavorite(req.params.id, siteId);
-      return res.json({ favorites: u.favorites });
+      update = { $pull: { favorites: siteId } };
+    } else {
+      update = { $addToSet: { favorites: siteId } };
     }
-    const u = addFavorite(req.params.id, siteId);
+
+    const u = await User.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!u) return res.status(404).json({ error: "user_not_found" });
+
     res.json({ favorites: u.favorites });
   } catch (e) {
-    res.status(404).json({ error: "user_not_found" });
+    console.error(e);
+    res.status(500).json({ error: "server_error" });
   }
 });
 
-r.get("/:id", authRequired, (req, res) => {
+r.get("/:id", authRequired, async (req, res) => {
   if (req.user.id !== req.params.id && req.user.role !== "admin") return res.status(403).json({ error: "forbidden" });
-  const u = users.find(x => x.id === req.params.id);
-  if (!u) return res.status(404).json({ error: "not_found" });
-  res.json({ id: u.id, name: u.name, email: u.email, role: u.role, favorites: u.favorites });
+  try {
+    const u = await User.findById(req.params.id).populate("favorites");
+    if (!u) return res.status(404).json({ error: "not_found" });
+    res.json({ id: u._id, name: u.name, email: u.email, role: u.role, favorites: u.favorites });
+  } catch (e) {
+    res.status(404).json({ error: "not_found" });
+  }
 });
 
 export default r;

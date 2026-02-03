@@ -10,8 +10,10 @@ import reviewsRouter from "./routes/reviews.js";
 import usersRouter from "./routes/users.js";
 import adminRouter from "./routes/admin.js";
 import uploadsRouter from "./routes/uploads.js";
+import connectDB from "./db.js";
 
 dotenv.config();
+connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
