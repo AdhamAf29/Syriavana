@@ -58,16 +58,19 @@ import {
 } from '@phosphor-icons/vue';
 import {
   Chart as ChartJS,
-  ArcElement,
+  Title,
   Tooltip,
   Legend,
   BarElement,
   CategoryScale,
-  LinearScale
+  LinearScale,
+  ArcElement
 } from 'chart.js';
 import { Doughnut, Bar } from 'vue-chartjs';
 
-ChartJS.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
+
+console.log("AdminOverview mounted");
 
 // Top Stats Data
 const topStats = [

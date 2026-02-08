@@ -17,7 +17,7 @@ const tripSchema = new mongoose.Schema({
   totalSeats: { type: Number },
   seatsAvailable: { type: Number },
   departurePoint: { type: String },
-  companyId: { type: String, default: null }, // or ObjectId if referencing Company model
+  companyId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
   sites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Site" }],
   images: [String],
   rating: { type: Number, default: 0 },

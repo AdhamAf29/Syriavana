@@ -6,7 +6,7 @@ import User from "../models/User.js";
 const r = Router();
 
 r.post("/register", async (req, res) => {
-  const { name, email, password, phone, address, role } = req.body || {};
+  const { name, email, password, phone, address, role, companyProfile } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: "invalid_input" });
   
   try {
@@ -20,7 +20,8 @@ r.post("/register", async (req, res) => {
       password: passwordHash,
       phone: phone || "",
       address: address || "",
-      role: role || "user"
+      role: role || "user",
+      companyProfile: role === "company" ? companyProfile : undefined
     });
 
     res.status(201).json({ id: user._id, email: user.email, role: user.role });

@@ -15,7 +15,15 @@
     <h2>الرحلات</h2>
     <div class="grid">
       <div v-for="t in filteredTrips" :key="t.id" :class="['card','trips-card', t.discount?.active ? 'offer-card' : '']">
-        <div class="header"><h3 class="card-title">{{ t.title }}</h3></div>
+        <div class="header">
+          <h3 class="card-title">{{ t.title }}</h3>
+          <div v-if="t.companyId" class="company-link" style="margin-top: 5px; font-size: 0.9em;">
+            <span style="color: #666;">Organized by: </span>
+            <router-link :to="'/companies/' + t.companyId._id" style="color: #235789; font-weight: 600; text-decoration: none;">
+              {{ t.companyId.name }}
+            </router-link>
+          </div>
+        </div>
         <div class="card-media">
           <img class="card-img" :src="t.images?.[0] || ''" alt="" />
         </div>

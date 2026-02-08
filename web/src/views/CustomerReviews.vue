@@ -29,11 +29,19 @@
         <form @submit.prevent="submit">
           <label>الاسم<input v-model="form.name" /></label>
           <label>التقييم
-            <select v-model.number="form.rating">
-              <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
-            </select>
+            <div class="star-rating-input">
+              <span 
+                v-for="n in 5" 
+                :key="n" 
+                class="star-input" 
+                :class="{ active: n <= (hoverRating || form.rating) }"
+                @click="setRating(n)"
+                @mouseover="hoverRating = n"
+                @mouseleave="hoverRating = 0"
+              >★</span>
+            </div>
           </label>
-          <label>نص التقييم<textarea v-model="form.text" rows="4"></textarea></label>
+          <label>نص التقييم<textarea v-model="form.text" rows="4" @input="autoResize" class="auto-grow"></textarea></label>
           <div class="actions">
             <button class="btn btn-primary" type="submit">حفظ</button>
             <button class="btn btn-outline" type="button" @click="close">إلغاء</button>
@@ -44,24 +52,48 @@
   </div>
 </template>
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAuthStore } from "../store/auth.js";
 import { useRouter } from "vue-router";
 const auth = useAuthStore();
 const router = useRouter();
-const reviews = ref([
+const defaultReviews = [
   { name: "أحمد", text: "منصة رائعة تسهّل التخطيط للرحلات واستكشاف المواقع الأثرية.", rating: 5 },
   { name: "سارة", text: "التصميم جميل والمعلومات واضحة ومفيدة.", rating: 4 },
   { name: "ليلى", text: "أعجبني ترتيب الصفحات وإتاحة الحجز بسهولة.", rating: 5 },
   { name: "يوسف", text: "التقييمات مفيدة، وأود رؤية المزيد من الصور لكل موقع.", rating: 4 },
   { name: "هبة", text: "دعم اللغة العربية ممتاز والواجهة مريحة.", rating: 5 },
   { name: "كريم", text: "ساعدتني المنصة في اختيار المواقع الأنسب لجدولي.", rating: 4 }
-]);
+];
+const reviews = ref([]);
+
+function autoResize(event) {
+  event.target.style.height = 'auto';
+  event.target.style.height = event.target.scrollHeight + 'px';
+}
+
+onMounted(() => {
+  const saved = localStorage.getItem("customerReviews");
+  if (saved) {
+    reviews.value = JSON.parse(saved);
+  } else {
+    reviews.value = [...defaultReviews];
+  }
+});
+
 const showForm = ref(false);
 const form = ref({ name: "", rating: 5, text: "" });
+const hoverRating = ref(0);
+
 function addReview(){ if (!auth.loggedIn) { router.push("/login"); return; } showForm.value = true; }
-function close(){ showForm.value = false; }
-function submit(){ reviews.value.unshift({ name: form.value.name || "زائر", text: form.value.text || "", rating: form.value.rating || 5 }); close(); }
+function close(){ showForm.value = false; hoverRating.value = 0; }
+function setRating(n) { form.value.rating = n; }
+function submit(){ 
+  const newReview = { name: form.value.name || "زائر", text: form.value.text || "", rating: form.value.rating || 5 };
+  reviews.value.unshift(newReview);
+  localStorage.setItem("customerReviews", JSON.stringify(reviews.value));
+  close(); 
+}
 </script>
 <style>
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:50}
@@ -89,5 +121,39 @@ function submit(){ reviews.value.unshift({ name: form.value.name || "زائر", 
   }
   .reviews-card .stars {
     color: var(--primary);
+  }
+  
+  .star-rating-input {
+    display: flex;
+    gap: 5px;
+    font-size: 2rem;
+    cursor: pointer;
+    margin-top: 5px;
+    direction: ltr; /* Ensure stars go left-to-right 1-5 */
+    justify-content: flex-end; /* Align right for RTL layout */
+  }
+
+  .star-input {
+    color: #ccc;
+    transition: color 0.2s;
+  }
+
+  .star-input.active {
+    color: #f39c12; /* Gold color for active stars */
+  }
+  
+  .star-input:hover {
+    transform: scale(1.1);
+  }
+
+  textarea.auto-grow {
+    resize: none;
+    overflow-y: hidden;
+    min-height: 100px;
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
   }
 </style>

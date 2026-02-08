@@ -5,6 +5,27 @@ import { authRequired } from "../middleware/auth.js";
 
 const r = Router();
 
+// Get bookings for company's trips
+r.get("/company", authRequired, async (req, res) => {
+  if (req.user.role !== "company") return res.status(403).json({ error: "forbidden" });
+  try {
+    // Find all trips by this company
+    const trips = await Trip.find({ companyId: req.user.id }).select("_id");
+    const tripIds = trips.map(t => t._id);
+
+    // Find bookings for these trips
+    const bookings = await Booking.find({ tripId: { $in: tripIds } })
+      .populate("tripId", "title startDate")
+      .populate("userId", "name email phone")
+      .sort({ createdAt: -1 });
+
+    res.json(bookings);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
 r.get("/my", authRequired, async (req, res) => {
   try {
     const list = await Booking.find({ userId: req.user.id }).populate("tripId");

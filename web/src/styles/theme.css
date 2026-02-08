@@ -43,7 +43,7 @@ h1,h2{color:var(--primary)}
 .btn-accent:hover{filter:brightness(1.05);transform:translateY(-1px)}
 .btn-outline{background:transparent;color:var(--primary);border:2px solid var(--primary)}
 .btn-outline:hover{color:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
-label{display:block;margin:8px 0;font-weight:600}
+label{display:flex;flex-direction:column;gap:16px;margin-bottom:24px;font-weight:600}
 input,select,textarea{width:100%;padding:10px;border:1px solid var(--bg-soft);border-radius:10px;background:var(--white);color:var(--text)}
 form{background:var(--white);border:1px solid var(--bg-soft);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
 .section{background:var(--bg-soft);border-radius:var(--radius);padding:12px}

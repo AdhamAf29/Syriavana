@@ -6,8 +6,13 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   phone: { type: String, default: "" },
   address: { type: String, default: "" },
-  role: { type: String, enum: ["user", "admin"], default: "user" },
+  role: { type: String, enum: ["user", "admin", "company"], default: "user" },
   favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Site" }],
+  companyProfile: {
+    description: { type: String, default: "" },
+    logo: { type: String, default: "" },
+    contactInfo: { type: String, default: "" }
+  }
 }, { timestamps: true });
 
 // Transform _id to id

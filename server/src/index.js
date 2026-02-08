@@ -9,7 +9,9 @@ import bookingsRouter from "./routes/bookings.js";
 import reviewsRouter from "./routes/reviews.js";
 import usersRouter from "./routes/users.js";
 import adminRouter from "./routes/admin.js";
+import messagesRouter from "./routes/messages.js";
 import uploadsRouter from "./routes/uploads.js";
+import companiesRouter from "./routes/companies.js";
 import connectDB from "./db.js";
 
 dotenv.config();
@@ -30,7 +32,9 @@ app.use("/api/bookings", bookingsRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/admin", adminRouter);
+app.use("/api/messages", messagesRouter);
 app.use("/api/uploads", uploadsRouter);
+app.use("/api/companies", companiesRouter);
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
