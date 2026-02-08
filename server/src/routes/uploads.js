@@ -8,10 +8,18 @@ const r = Router();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const folder = String(req.body.folder || "sites").replace(/[^a-zA-Z0-9_-]/g, "");
-    const dir = path.join(process.cwd(), "uploads", folder);
-    fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
+    try {
+      const folder = String(req.body.folder || "sites").replace(/[^a-zA-Z0-9_-]/g, "");
+      const dir = path.join(process.cwd(), "uploads", folder);
+      console.log(`[Upload] Saving to directory: ${dir}`);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      cb(null, dir);
+    } catch (err) {
+      console.error("[Upload] Error creating directory:", err);
+      cb(err);
+    }
   },
   filename: (req, file, cb) => {
     const ts = Date.now();

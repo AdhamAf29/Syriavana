@@ -21,6 +21,7 @@
             </p>
             <div class="actions">
               <router-link :to="`/companies/${company._id}`" class="btn-view">View Profile</router-link>
+              <button v-if="auth.user?.role === 'admin'" @click="deleteCompany(company)" class="btn-delete">Delete</button>
             </div>
           </div>
         </div>
@@ -35,13 +36,31 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '../api.js';
+import { useAuthStore } from '../store/auth';
 
 const companies = ref([]);
 const loading = ref(true);
+const auth = useAuthStore();
 
 function truncate(text, length) {
   if (text.length <= length) return text;
   return text.substring(0, length) + '...';
+}
+
+async function deleteCompany(company) {
+  if (!confirm(`Are you sure you want to delete "${company.name}"? This action cannot be undone.`)) return;
+  
+  try {
+    // Assuming the admin delete route is protected and accessible
+    await api.delete(`/api/admin/companies/${company._id}`);
+    
+    // Remove from local list immediately
+    companies.value = companies.value.filter(c => c._id !== company._id);
+    alert("Company deleted successfully");
+  } catch (e) {
+    console.error(e);
+    alert("Failed to delete company");
+  }
 }
 
 onMounted(async () => {
@@ -139,8 +158,13 @@ onMounted(async () => {
   flex-grow: 1;
 }
 
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
 .btn-view {
-  display: block;
+  flex: 1;
   text-align: center;
   background: transparent;
   color: #235789;
@@ -154,6 +178,24 @@ onMounted(async () => {
 
 .btn-view:hover {
   background: #235789;
+  color: white;
+}
+
+.btn-delete {
+  flex: 1;
+  text-align: center;
+  background: #fff5f5;
+  color: #e53e3e;
+  border: 2px solid #e53e3e;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-delete:hover {
+  background: #e53e3e;
   color: white;
 }
 

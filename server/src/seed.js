@@ -4,8 +4,10 @@ import connectDB from "./db.js";
 import Site from "./models/Site.js";
 import Trip from "./models/Trip.js";
 import User from "./models/User.js";
+import Company from "./models/Company.js";
 import Booking from "./models/Booking.js";
 import Review from "./models/Review.js";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -223,9 +225,48 @@ const seedData = async () => {
     await Trip.deleteMany();
     await Booking.deleteMany();
     await Review.deleteMany();
-    // await User.deleteMany(); // Uncomment if you want to reset users too
+    await User.deleteMany();
+    await Company.deleteMany();
 
     console.log("Data cleared...");
+
+    // Create Users
+    const hashedPassword = await bcrypt.hash("123456", 10);
+    
+    const adminUser = await User.create({
+      name: "Admin User",
+      email: "admin@syriavana.com",
+      password: hashedPassword,
+      role: "admin"
+    });
+
+    const companyUser = await User.create({
+      name: "Syriavana Tours Owner",
+      email: "tours@syriavana.com",
+      password: hashedPassword,
+      role: "company"
+    });
+
+    const normalUser = await User.create({
+      name: "Normal User",
+      email: "user@syriavana.com",
+      password: hashedPassword,
+      role: "user"
+    });
+
+    console.log("Users created.");
+
+    // Create Company Profile
+    const company = await Company.create({
+      userId: companyUser._id,
+      name: "Syriavana Tours",
+      description: "The official tourism company for Syriavana.",
+      contactInfo: "contact@syriavana.com | +963 11 1234567",
+      logo: "/images/logo.png",
+      status: "active"
+    });
+
+    console.log("Company profile created.");
 
     // Insert Sites
     const createdSites = await Site.insertMany(sitesData);
@@ -253,7 +294,7 @@ const seedData = async () => {
         totalSeats: 40,
         seatsAvailable: 40,
         departurePoint: "Damascus",
-        companyId: null,
+        companyId: company._id,
         sites: [siteRef._id],
         images: [image],
         rating: siteRef.ratingAverage,

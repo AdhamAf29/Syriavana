@@ -37,10 +37,10 @@ r.post("/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ error: "invalid_credentials" });
+    if (!user) return res.status(401).json({ error: "user_not_found" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ error: "invalid_credentials" });
+    if (!isMatch) return res.status(401).json({ error: "wrong_password" });
 
     const token = jwt.sign(
       { id: user._id, role: user.role },

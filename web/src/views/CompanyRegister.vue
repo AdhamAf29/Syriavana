@@ -1,8 +1,8 @@
 <template>
   <div class="auth-page">
     <div class="auth-card rtl-form">
-      <h2>تسجيل شركة سياحية جديدة</h2>
-      <p class="subtitle">انضم إلى Syrianava لعرض رحلاتك</p>
+      <h2>إنشاء ملف شركة</h2>
+      <p class="subtitle">قم بترقية حسابك لعرض الرحلات وإدارتها</p>
       
       <form @submit.prevent="onSubmit">
         <div class="form-group">
@@ -10,27 +10,6 @@
           <input v-model="form.name" type="text" placeholder="أدخل اسم الشركة" required />
         </div>
 
-        <div class="form-group">
-          <label>البريد الإلكتروني</label>
-          <input v-model="form.email" type="email" placeholder="company@example.com" required />
-        </div>
-
-        <div class="form-group">
-          <label>كلمة المرور</label>
-          <input v-model="form.password" type="password" placeholder="أنشئ كلمة مرور قوية" required />
-        </div>
-
-        <div class="form-group">
-          <label>رقم الهاتف</label>
-          <input v-model="form.phone" type="tel" placeholder="+963 ..." />
-        </div>
-
-        <div class="form-group">
-          <label>العنوان</label>
-          <input v-model="form.address" type="text" placeholder="دمشق، سوريا" />
-        </div>
-
-        <!-- Company Specifics -->
         <div class="form-group">
           <label>نبذة عن الشركة</label>
           <textarea 
@@ -43,52 +22,78 @@
         </div>
 
         <div class="form-group">
-          <label>شعار الشركة (رابط الصورة)</label>
-          <input v-model="form.contactInfo" type="text" placeholder="رابط الشعار (اختياري)" />
+          <label>معلومات الاتصال</label>
+          <input v-model="form.contactInfo" type="text" placeholder="رقم الهاتف، العنوان، الخ..." />
+        </div>
+
+        <div class="form-group">
+          <label>شعار الشركة</label>
+          <input type="file" accept="image/*" @change="handleFileChange" class="file-input" />
+          <div v-if="uploading" class="uploading-text">جاري رفع الصورة...</div>
+          <div v-if="form.logo" class="logo-preview-container">
+            <img :src="apiBase + form.logo" class="preview-logo" alt="Logo Preview" />
+          </div>
         </div>
 
         <div v-if="error" class="error-msg">{{ error }}</div>
 
-        <button type="submit" class="btn-primary full-width" :disabled="loading">
-          {{ loading ? 'جاري إنشاء الحساب...' : 'إنشاء حساب' }}
+        <button type="submit" class="btn-primary full-width" :disabled="loading || uploading">
+          {{ loading ? 'جاري الإنشاء...' : 'إنشاء ملف الشركة' }}
         </button>
       </form>
-      
-      <p class="switch-auth">
-        لديك حساب بالفعل؟ <router-link to="/login">تسجيل الدخول</router-link>
-      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
-import axios from "axios";
+import api, { uploadImage } from "../api";
 import { useAuthStore } from "../store/auth";
 
 const router = useRouter();
 const auth = useAuthStore();
+const apiBase = import.meta.env.VITE_API_URL;
 
 const form = ref({
   name: "",
-  email: "",
-  password: "",
-  phone: "",
-  address: "",
   description: "",
-  contactInfo: ""
+  contactInfo: "",
+  logo: ""
 });
 
 const loading = ref(false);
+const uploading = ref(false);
 const error = ref("");
-
-const API_URL = "http://localhost:3001/api";
 
 function autoResize(event) {
   event.target.style.height = 'auto';
   event.target.style.height = event.target.scrollHeight + 'px';
 }
+
+async function handleFileChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  uploading.value = true;
+  try {
+    const res = await uploadImage(file, "companies");
+    form.value.logo = res.url;
+  } catch (err) {
+    console.error(err);
+    error.value = "فشل رفع الصورة";
+  } finally {
+    uploading.value = false;
+  }
+}
+
+onMounted(() => {
+  if (!auth.loggedIn) {
+    router.push("/login");
+  } else if (auth.user?.role === 'company') {
+    router.push("/company/dashboard");
+  }
+});
 
 async function onSubmit() {
   loading.value = true;
@@ -97,35 +102,23 @@ async function onSubmit() {
   try {
     const payload = {
       name: form.value.name,
-      email: form.value.email,
-      password: form.value.password,
-      phone: form.value.phone,
-      address: form.value.address,
-      role: "company",
-      companyProfile: {
-        description: form.value.description,
-        contactInfo: form.value.contactInfo,
-        logo: "" // Logo upload can be added later
-      }
+      description: form.value.description,
+      contactInfo: form.value.contactInfo,
+      logo: form.value.logo
     };
 
-    const res = await axios.post(`${API_URL}/auth/register`, payload);
+    const res = await api.post("/api/companies", payload);
     
-    // Auto login after register
-    const loginRes = await axios.post(`${API_URL}/auth/login`, {
-      email: form.value.email,
-      password: form.value.password
-    });
-
-    auth.setAuth(loginRes.data.token, loginRes.data.user);
-    router.push("/company/dashboard");
-
-  } catch (e) {
-    if (e.response && e.response.data.error === "email_in_use") {
-      error.value = "This email is already registered.";
-    } else {
-      error.value = "Registration failed. Please try again.";
+    // Update local user role
+    if (auth.user) {
+      auth.user.role = "company";
+      // Optionally refresh user profile from server if needed
     }
+    
+    router.push("/company/dashboard");
+  } catch (err) {
+    console.error(err);
+    error.value = err.response?.data?.error || "حدث خطأ أثناء إنشاء الشركة";
   } finally {
     loading.value = false;
   }
@@ -137,16 +130,16 @@ async function onSubmit() {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
-  padding: 40px 20px;
-  background-color: #f9f9f9;
+  min-height: calc(100vh - 80px); /* Adjust for navbar */
+  background-color: #f8f9fa;
+  padding: 20px;
 }
 
 .auth-card {
   background: white;
   padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   width: 100%;
   max-width: 500px;
 }
@@ -158,8 +151,8 @@ async function onSubmit() {
 
 h2 {
   color: var(--primary);
-  text-align: center;
   margin-bottom: 10px;
+  text-align: center;
 }
 
 .subtitle {
@@ -188,32 +181,60 @@ input, textarea {
   transition: border-color 0.3s;
 }
 
-textarea.auto-grow {
-  resize: none;
-  overflow-y: hidden;
-  min-height: 80px;
-}
-
 input:focus, textarea:focus {
   border-color: var(--primary);
   outline: none;
 }
 
+.auto-grow {
+  min-height: 80px;
+  resize: none;
+  overflow-y: hidden;
+}
+
+.file-input {
+  padding: 8px;
+  background: #f1f1f1;
+}
+
+.uploading-text {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 5px;
+}
+
+.logo-preview-container {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.preview-logo {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  object-fit: cover;
+}
+
 .btn-primary {
   background-color: var(--primary);
-  color: #1a1a1a;
+  color: white;
   border: none;
   padding: 14px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.3s;
-  margin-top: 10px;
+  transition: background-color 0.3s;
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
+  background-color: #1a4570; /* Darker shade of primary */
+}
+
+.btn-primary:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .full-width {
@@ -221,23 +242,11 @@ input:focus, textarea:focus {
 }
 
 .error-msg {
-  color: #e74c3c;
-  background-color: #fdecea;
+  color: #dc3545;
+  background-color: #f8d7da;
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 20px;
   text-align: center;
-}
-
-.switch-auth {
-  text-align: center;
-  margin-top: 20px;
-  color: #666;
-}
-
-.switch-auth a {
-  color: var(--primary);
-  font-weight: 700;
-  text-decoration: none;
 }
 </style>

@@ -28,6 +28,10 @@
           <PhMapPin class="icon" />
           <span>Sites</span>
         </router-link>
+        <router-link to="/admin/companies" class="nav-item" active-class="active">
+          <PhBuildings class="icon" />
+          <span>Companies</span>
+        </router-link>
         <router-link to="/admin/revenue" class="nav-item" active-class="active">
           <PhCurrencyDollar class="icon" />
           <span>Revenue</span>
@@ -64,7 +68,8 @@ import {
   PhTicket, 
   PhMapPin, 
   PhSignOut,
-  PhCurrencyDollar
+  PhCurrencyDollar,
+  PhBuildings
 } from '@phosphor-icons/vue';
 </script>
 

@@ -10,11 +10,24 @@ api.interceptors.request.use((cfg) => {
   return cfg;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Only redirect to login if 401 comes from a non-login endpoint
+    if (error.response && error.response.status === 401 && !error.config.url.includes("/auth/login")) {
+      const s = useAuthStore();
+      s.logout();
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function uploadImage(file, folder = "sites") {
   const fd = new FormData();
-  fd.append("file", file);
   fd.append("folder", folder);
-  const r = await api.post("/api/uploads", fd, { headers: { "Content-Type": "multipart/form-data" } });
+  fd.append("file", file);
+  const r = await api.post("/api/uploads", fd);
   return r.data; // { url, filename }
 }
 

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Trip from "../models/Trip.js";
+import Company from "../models/Company.js";
 import Booking from "../models/Booking.js";
 import { authRequired } from "../middleware/auth.js";
 
@@ -8,7 +9,7 @@ const r = Router();
 // Get all trips
 r.get("/", async (req, res) => {
   try {
-    const trips = await Trip.find({ active: true }).populate("companyId", "name companyProfile.logo");
+    const trips = await Trip.find({ active: true }).populate("companyId", "name logo");
     res.json(trips);
   } catch (e) {
     res.status(500).json({ error: "server_error" });
@@ -23,9 +24,17 @@ r.post("/", authRequired, async (req, res) => {
   }
 
   try {
+    let companyId = null;
+
+    if (req.user.role === "company") {
+      const company = await Company.findOne({ userId: req.user.id });
+      if (!company) return res.status(400).json({ error: "company_profile_not_found" });
+      companyId = company._id;
+    }
+
     const tripData = {
       ...req.body,
-      companyId: req.user.role === "company" ? req.user.id : null // Admin trips have no companyId or null
+      companyId
     };
 
     const trip = await Trip.create(tripData);
@@ -43,10 +52,12 @@ r.put("/:id", authRequired, async (req, res) => {
     if (!trip) return res.status(404).json({ error: "not_found" });
 
     // Check ownership
-    if (req.user.role === "company" && trip.companyId?.toString() !== req.user.id) {
-      return res.status(403).json({ error: "forbidden" });
-    }
-    if (req.user.role !== "company" && req.user.role !== "admin") {
+    if (req.user.role === "company") {
+      const company = await Company.findOne({ userId: req.user.id });
+      if (!company || trip.companyId?.toString() !== company._id.toString()) {
+        return res.status(403).json({ error: "forbidden" });
+      }
+    } else if (req.user.role !== "admin") {
       return res.status(403).json({ error: "forbidden" });
     }
 
@@ -66,10 +77,12 @@ r.delete("/:id", authRequired, async (req, res) => {
     if (!trip) return res.status(404).json({ error: "not_found" });
 
     // Check ownership
-    if (req.user.role === "company" && trip.companyId?.toString() !== req.user.id) {
-      return res.status(403).json({ error: "forbidden" });
-    }
-    if (req.user.role !== "company" && req.user.role !== "admin") {
+    if (req.user.role === "company") {
+      const company = await Company.findOne({ userId: req.user.id });
+      if (!company || trip.companyId?.toString() !== company._id.toString()) {
+        return res.status(403).json({ error: "forbidden" });
+      }
+    } else if (req.user.role !== "admin") {
       return res.status(403).json({ error: "forbidden" });
     }
 
@@ -86,7 +99,10 @@ r.delete("/:id", authRequired, async (req, res) => {
 r.get("/my-trips", authRequired, async (req, res) => {
   if (req.user.role !== "company") return res.status(403).json({ error: "forbidden" });
   try {
-    const trips = await Trip.find({ companyId: req.user.id });
+    const company = await Company.findOne({ userId: req.user.id });
+    if (!company) return res.json([]); // Return empty if no company profile
+
+    const trips = await Trip.find({ companyId: company._id });
     res.json(trips);
   } catch (e) {
     res.status(500).json({ error: "server_error" });
@@ -95,47 +111,10 @@ r.get("/my-trips", authRequired, async (req, res) => {
 
 r.get("/:id", async (req, res) => {
   try {
-    const t = await Trip.findById(req.params.id).populate("companyId", "name companyProfile");
+    const t = await Trip.findById(req.params.id).populate("companyId", "name logo");
     if (!t) return res.status(404).json({ error: "not_found" });
     res.json(t);
   } catch (e) {
-    res.status(404).json({ error: "not_found" });
-  }
-});
-
-r.post("/:id/book", authRequired, async (req, res) => {
-  const { numberOfPeople, companions, paymentMethod, notes, busType } = req.body || {};
-  if (!numberOfPeople || numberOfPeople < 1) return res.status(400).json({ error: "invalid_input" });
-
-  try {
-    const trip = await Trip.findById(req.params.id);
-    if (!trip) return res.status(404).json({ error: "not_found" });
-
-    if (trip.seatsAvailable < numberOfPeople) {
-      return res.status(400).json({ error: "insufficient_seats" });
-    }
-
-    const booking = await Booking.create({
-      userId: req.user.id,
-      tripId: trip._id,
-      numberOfPeople,
-      companions: companions || [],
-      paymentMethod: paymentMethod || "cash",
-      notes: notes || "",
-      busType: busType || "standard",
-      bookingStatus: "confirmed" // Auto-confirm for now
-    });
-
-    // Update seats
-    trip.seatsAvailable -= numberOfPeople;
-    await trip.save();
-
-    res.status(201).json({
-      booking,
-      message: "Booking successful — Please visit our Damascus office for payment and final details."
-    });
-  } catch (e) {
-    console.error(e);
     res.status(500).json({ error: "server_error" });
   }
 });

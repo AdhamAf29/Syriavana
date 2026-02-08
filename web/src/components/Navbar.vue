@@ -12,6 +12,7 @@
         <template v-if="auth.loggedIn">
            <!-- User Links -->
            <router-link v-if="auth.user?.role === 'user'" to="/bookings">حجوزاتي</router-link>
+           <router-link v-if="auth.user?.role === 'user'" to="/register-company" style="color: var(--secondary);">سجل شركتك</router-link>
            
            <!-- Company Links -->
            <router-link v-if="auth.user?.role === 'company'" to="/company/dashboard" style="color: var(--accent);">لوحة التحكم</router-link>

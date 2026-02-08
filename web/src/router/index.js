@@ -24,6 +24,7 @@ import AdminTrips from "../views/admin/AdminTrips.vue";
 import AdminBookings from "../views/admin/AdminBookings.vue";
 import AdminSites from "../views/admin/AdminSites.vue";
 import AdminRevenue from "../views/admin/AdminRevenue.vue";
+import AdminCompanies from "../views/admin/AdminCompanies.vue";
 
 const routes = [
   { path: "/", component: Home },
@@ -61,6 +62,7 @@ const routes = [
       { path: "trips", component: AdminTrips },
       { path: "bookings", component: AdminBookings },
       { path: "sites", component: AdminSites },
+      { path: "companies", component: AdminCompanies },
       { path: "revenue", component: AdminRevenue }
     ]
   }
