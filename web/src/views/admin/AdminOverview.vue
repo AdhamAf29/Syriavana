@@ -49,6 +49,8 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
+import api from '../../api';
 import { 
   PhUsers, 
   PhAirplaneTilt, 
@@ -72,31 +74,31 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 console.log("AdminOverview mounted");
 
-// Top Stats Data
-const topStats = [
-  { label: 'Total Trips', value: '15', icon: PhAirplaneTilt },
-  { label: 'Total Users', value: '1,200', icon: PhUsers },
-  { label: 'Total Bookings', value: '450', icon: PhTicket },
-  { label: 'Total Revenue', value: '$12,500', icon: PhCurrencyDollar },
-  { label: 'Active Sites', value: '12', icon: PhGlobeHemisphereWest }
-];
+// Reactive Stats Data
+const topStats = ref([
+  { label: 'Total Trips', value: '0', icon: PhAirplaneTilt },
+  { label: 'Total Users', value: '0', icon: PhUsers },
+  { label: 'Total Bookings', value: '0', icon: PhTicket },
+  { label: 'Total Revenue', value: '$0', icon: PhCurrencyDollar },
+  { label: 'Active Sites', value: '0', icon: PhGlobeHemisphereWest }
+]);
 
 // Bottom Stats Data
-const bottomStats = [
-  { label: 'Revenue per User', value: '$10.4', trend: 2.5 },
-  { label: 'Avg. Rating per Trip', value: '4.8', trend: 0.5 },
-  { label: 'Bookings per Month', value: '38', trend: -5.2 },
-  { label: 'Avg. Trip Price', value: '$120', trend: 1.2 }
-];
+const bottomStats = ref([
+  { label: 'Revenue per User', value: '$0', trend: 0 },
+  { label: 'Avg. Rating per Trip', value: '0', trend: 0 },
+  { label: 'Bookings per Month', value: '0', trend: 0 },
+  { label: 'Avg. Trip Price', value: '$0', trend: 0 }
+]);
 
 // Charts Data
-const pieChartData = {
+const pieChartData = ref({
   labels: ['Confirmed', 'Pending', 'Cancelled'],
   datasets: [{
     backgroundColor: ['#235789', '#FFC805', '#C6DCF0'],
-    data: [65, 20, 15]
+    data: [0, 0, 0]
   }]
-};
+});
 
 const pieChartOptions = {
   responsive: true,
@@ -106,14 +108,14 @@ const pieChartOptions = {
   }
 };
 
-const barChartData = {
+const barChartData = ref({
   labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
   datasets: [{
     label: 'Bookings',
     backgroundColor: '#235789',
-    data: [40, 20, 12, 39, 10, 40, 39, 80, 40, 20, 12, 11]
+    data: Array(12).fill(0)
   }]
-};
+});
 
 const barChartOptions = {
   responsive: true,
@@ -122,6 +124,67 @@ const barChartOptions = {
     y: { beginAtZero: true }
   }
 };
+
+onMounted(async () => {
+  try {
+    const { data } = await api.get('/api/admin/stats');
+    
+    // Update Top Stats
+    topStats.value = [
+      { label: 'Total Trips', value: data.trips.toString(), icon: PhAirplaneTilt },
+      { label: 'Total Users', value: data.users.toLocaleString(), icon: PhUsers },
+      { label: 'Total Bookings', value: data.bookings.toString(), icon: PhTicket },
+      { label: 'Total Revenue', value: `$${data.revenue.toLocaleString()}`, icon: PhCurrencyDollar },
+      { label: 'Active Sites', value: data.sites.toString(), icon: PhGlobeHemisphereWest }
+    ];
+
+    // Update Pie Chart (Booking Status)
+    const statusMap = { confirmed: 0, pending: 0, cancelled: 0 };
+    data.bookingStatus.forEach(item => {
+      if (statusMap[item._id] !== undefined) {
+        statusMap[item._id] = item.count;
+      }
+    });
+    pieChartData.value = {
+      labels: ['Confirmed', 'Pending', 'Cancelled'],
+      datasets: [{
+        backgroundColor: ['#235789', '#FFC805', '#C6DCF0'],
+        data: [statusMap.confirmed, statusMap.pending, statusMap.cancelled]
+      }]
+    };
+
+    // Update Bar Chart (Monthly Bookings)
+    const monthlyData = Array(12).fill(0);
+    data.monthlyBookings.forEach(item => {
+      // item._id is month number (1-12)
+      if (item._id >= 1 && item._id <= 12) {
+        monthlyData[item._id - 1] = item.count;
+      }
+    });
+    barChartData.value = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+      datasets: [{
+        label: 'Bookings',
+        backgroundColor: '#235789',
+        data: monthlyData
+      }]
+    };
+
+    // Update Bottom Stats (Calculated)
+    const revenuePerUser = data.users > 0 ? (data.revenue / data.users).toFixed(1) : '0';
+    // const avgTripPrice = data.trips > 0 ? (data.revenue / data.bookings).toFixed(0) : '0'; // Roughly revenue / bookings as proxy
+    
+    bottomStats.value = [
+      { label: 'Revenue per User', value: `$${revenuePerUser}`, trend: 0 },
+      { label: 'Avg. Rating per Trip', value: '4.8', trend: 0 }, // Mock for now or fetch from trips agg
+      { label: 'Bookings per Month', value: (data.bookings / 12).toFixed(1), trend: 0 },
+      { label: 'Avg. Trip Price', value: '$150', trend: 0 } // Mock or fetch
+    ];
+
+  } catch (e) {
+    console.error("Failed to load dashboard stats", e);
+  }
+});
 </script>
 
 <style scoped>

@@ -119,4 +119,79 @@ r.get("/:id", async (req, res) => {
   }
 });
 
+import fs from 'fs';
+import path from 'path';
+
+function logDebug(msg) {
+  const logPath = path.join(process.cwd(), 'debug.log');
+  const time = new Date().toISOString();
+  fs.appendFileSync(logPath, `[${time}] ${msg}\n`);
+}
+
+// Book a trip
+r.post("/:id/book", authRequired, async (req, res) => {
+  logDebug("--- Booking Request Start ---");
+  logDebug("Trip ID: " + req.params.id);
+  logDebug("User ID: " + req.user?.id);
+  logDebug("Body: " + JSON.stringify(req.body));
+
+  try {
+    const trip = await Trip.findById(req.params.id);
+    if (!trip) {
+      logDebug("Trip not found");
+      return res.status(404).json({ error: "not_found" });
+    }
+
+    logDebug("Trip found: " + trip.title);
+    logDebug("Seats Available (before): " + trip.seatsAvailable);
+
+    const { numberOfPeople, paymentMethod, busType, notes } = req.body;
+    
+    // Ensure numberOfPeople is a valid number
+    const numPeople = parseInt(numberOfPeople, 10);
+    if (isNaN(numPeople) || numPeople < 1) {
+       logDebug("Invalid number of people: " + numberOfPeople);
+       return res.status(400).json({ message: "Invalid number of people" });
+    }
+
+    // Fix seatsAvailable if missing or invalid
+    if (typeof trip.seatsAvailable !== 'number') {
+      logDebug("Fixing invalid seatsAvailable");
+      trip.seatsAvailable = trip.totalSeats || 50; 
+    }
+
+    if (trip.seatsAvailable < numPeople) {
+      logDebug("Not enough seats. Requested: " + numPeople + ", Available: " + trip.seatsAvailable);
+      return res.status(400).json({ message: "Not enough seats available" });
+    }
+
+    logDebug("Creating booking object...");
+    const bookingData = {
+      userId: req.user.id,
+      tripId: trip._id,
+      numberOfPeople: numPeople,
+      paymentMethod,
+      busType,
+      notes,
+      companions: req.body.companions || []
+    };
+    logDebug("Booking Data: " + JSON.stringify(bookingData));
+
+    const booking = await Booking.create(bookingData);
+    logDebug("Booking created: " + booking._id);
+
+    trip.seatsAvailable -= numPeople;
+    await trip.save();
+    logDebug("Trip updated. New seats: " + trip.seatsAvailable);
+
+    res.status(201).json({ message: "Booking confirmed", booking });
+  } catch (e) {
+    logDebug("Booking Error Stack: " + e.stack);
+    console.error("Booking Error Stack:", e.stack);
+    res.status(500).json({ message: "Server error: " + e.message });
+  } finally {
+    logDebug("--- Booking Request End ---");
+  }
+});
+
 export default r;

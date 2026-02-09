@@ -47,7 +47,7 @@
         <label>ملاحظات<textarea v-model="notes" @input="autoResize" class="auto-grow"></textarea></label>
         <button class="btn btn-primary" type="submit">تأكيد الحجز</button>
       </form>
-      <p v-if="msg" style="color:green">{{ msg }}</p>
+      <p v-if="msg" :style="{ color: isError ? 'red' : 'green' }">{{ msg }}</p>
       <h3>تقييم الرحلة</h3>
       <form @submit.prevent="review">
         <label>التقييم
@@ -91,6 +91,7 @@ const paymentMethod = ref("cash");
 const busType = ref("standard");
 const notes = ref("");
 const msg = ref("");
+const isError = ref(false);
 const rating = ref(5);
 const hoverRating = ref(0);
 const comment = ref("");
@@ -105,9 +106,23 @@ function autoResize(event) {
 async function load() { const r = await api.get("/api/trips/" + route.params.id); trip.value = r.data; }
 async function book() {
   msg.value = "";
-  const r = await api.post(`/api/trips/${route.params.id}/book`, { numberOfPeople: numberOfPeople.value, paymentMethod: paymentMethod.value, busType: busType.value, notes: notes.value });
-  msg.value = r.data.message;
-  await load();
+  isError.value = false;
+  console.log("Sending booking request...", {
+    numberOfPeople: numberOfPeople.value,
+    paymentMethod: paymentMethod.value,
+    busType: busType.value,
+    notes: notes.value
+  });
+  try {
+    const r = await api.post(`/api/trips/${route.params.id}/book`, { numberOfPeople: numberOfPeople.value, paymentMethod: paymentMethod.value, busType: busType.value, notes: notes.value });
+    msg.value = r.data.message;
+    await load();
+  } catch (e) {
+    console.error("Booking failed:", e);
+    isError.value = true;
+    const serverMsg = e.response?.data?.message || e.message;
+    msg.value = "Error: " + serverMsg;
+  }
 }
 async function review() {
   rmsg.value = ""; rerr.value = false;

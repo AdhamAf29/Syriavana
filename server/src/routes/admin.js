@@ -12,6 +12,77 @@ const r = Router();
 r.use(authRequired);
 r.use(roleRequired("admin"));
 
+r.get("/stats", async (req, res) => {
+  try {
+    const [
+      usersCount,
+      tripsCount,
+      bookingsCount,
+      sitesCount,
+      companiesCount,
+      revenueData,
+      bookingsByStatus,
+      monthlyBookings
+    ] = await Promise.all([
+      User.countDocuments({ role: "user" }),
+      Trip.countDocuments({ active: true }),
+      Booking.countDocuments(),
+      Site.countDocuments(),
+      Company.countDocuments(),
+      Booking.aggregate([
+        {
+          $lookup: {
+            from: "trips",
+            localField: "tripId",
+            foreignField: "_id",
+            as: "trip"
+          }
+        },
+        { $unwind: "$trip" },
+        {
+          $group: {
+            _id: null,
+            total: { $sum: { $multiply: ["$numberOfPeople", "$trip.price"] } }
+          }
+        }
+      ]),
+      Booking.aggregate([
+        {
+          $group: {
+            _id: "$bookingStatus",
+            count: { $sum: 1 }
+          }
+        }
+      ]),
+      Booking.aggregate([
+        {
+          $group: {
+            _id: { $month: "$createdAt" },
+            count: { $sum: 1 }
+          }
+        },
+        { $sort: { _id: 1 } }
+      ])
+    ]);
+
+    const totalRevenue = revenueData[0]?.total || 0;
+
+    res.json({
+      users: usersCount,
+      trips: tripsCount,
+      bookings: bookingsCount,
+      sites: sitesCount,
+      companies: companiesCount,
+      revenue: totalRevenue,
+      bookingStatus: bookingsByStatus,
+      monthlyBookings
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "server_error" });
+  }
+});
+
 r.get("/companies", async (req, res) => {
   try {
     const list = await Company.find().populate("userId", "name email");
@@ -48,13 +119,32 @@ r.get("/sites", async (req, res) => {
 });
 
 r.get("/trips", async (req, res) => {
-  const list = await Trip.find();
+  const list = await Trip.find().populate("companyId", "name");
   res.json(list);
 });
 
 r.get("/users", async (req, res) => {
   const list = await User.find().select("-password");
   res.json(list);
+});
+
+r.get("/bookings", async (req, res) => {
+  try {
+    const list = await Booking.find()
+      .populate("userId", "name email")
+      .populate({
+        path: "tripId",
+        select: "title price companyId",
+        populate: {
+          path: "companyId",
+          select: "name"
+        }
+      })
+      .sort({ createdAt: -1 });
+    res.json(list);
+  } catch (e) {
+    res.status(500).json({ error: "server_error" });
+  }
 });
 
 r.get("/reviews", async (req, res) => {
