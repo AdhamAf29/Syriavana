@@ -33,7 +33,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "../../store/auth";
-import axios from "axios";
+import api from "../../api";
 
 const auth = useAuthStore();
 const trips = ref([]);
@@ -42,12 +42,8 @@ const bookings = ref([]);
 onMounted(async () => {
   try {
     const [tripsRes, bookingsRes] = await Promise.all([
-      axios.get("http://localhost:3001/api/trips/my-trips", {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      }),
-      axios.get("http://localhost:3001/api/bookings/company", {
-        headers: { Authorization: `Bearer ${auth.token}` }
-      })
+      api.get("/api/trips/my-trips"),
+      api.get("/api/bookings/company")
     ]);
     
     trips.value = tripsRes.data;
