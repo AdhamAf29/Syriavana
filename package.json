@@ -4,10 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "nodemon api/index.js",
+    "dev:api": "nodemon backend/index.js",
     "dev:web": "vite web",
     "build": "cd web && vite build",
-    "start": "node api/index.js"
+    "start": "node backend/index.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
