@@ -9,3 +9,36 @@
 [2026-02-09T09:01:16.037Z] Booking created: 6989a25ce5176dac6184a93c
 [2026-02-09T09:01:16.054Z] Trip updated. New seats: 39
 [2026-02-09T09:01:16.057Z] --- Booking Request End ---
+[2026-02-10T13:02:50.660Z] --- Booking Request Start ---
+[2026-02-10T13:02:50.661Z] Trip ID: 69887a8c63a4b47e08c05ea9
+[2026-02-10T13:02:50.662Z] User ID: 69899ae669ce6dc21ab19dfd
+[2026-02-10T13:02:50.663Z] Body: {"numberOfPeople":1,"paymentMethod":"cash","busType":"standard","notes":""}
+[2026-02-10T13:02:50.666Z] Trip found: رحلة تدمر
+[2026-02-10T13:02:50.667Z] Seats Available (before): 39
+[2026-02-10T13:02:50.667Z] Creating booking object...
+[2026-02-10T13:02:50.668Z] Booking Data: {"userId":"69899ae669ce6dc21ab19dfd","tripId":"69887a8c63a4b47e08c05ea9","numberOfPeople":1,"paymentMethod":"cash","busType":"standard","notes":"","companions":[]}
+[2026-02-10T13:02:50.720Z] Booking created: 698b2c7a664b8c3ad9becaaa
+[2026-02-10T13:02:50.735Z] Trip updated. New seats: 38
+[2026-02-10T13:02:50.736Z] --- Booking Request End ---
+[2026-02-10T13:25:12.726Z] --- Booking Request Start ---
+[2026-02-10T13:25:12.727Z] Trip ID: 69887a8c63a4b47e08c05ea9
+[2026-02-10T13:25:12.728Z] User ID: 69899ae669ce6dc21ab19dfd
+[2026-02-10T13:25:12.728Z] Body: {"numberOfPeople":1,"paymentMethod":"cash","busType":"standard","notes":""}
+[2026-02-10T13:25:12.730Z] Trip found: رحلة تدمر
+[2026-02-10T13:25:12.731Z] Seats Available (before): 38
+[2026-02-10T13:25:12.732Z] Creating booking object...
+[2026-02-10T13:25:12.733Z] Booking Data: {"userId":"69899ae669ce6dc21ab19dfd","tripId":"69887a8c63a4b47e08c05ea9","numberOfPeople":1,"paymentMethod":"cash","busType":"standard","notes":"","companions":[]}
+[2026-02-10T13:25:12.736Z] Booking created: 698b31b8664b8c3ad9becc3f
+[2026-02-10T13:25:12.739Z] Trip updated. New seats: 37
+[2026-02-10T13:25:12.740Z] --- Booking Request End ---
+[2026-02-11T08:27:45.960Z] --- Booking Request Start ---
+[2026-02-11T08:27:45.961Z] Trip ID: 69887a8c63a4b47e08c05eb0
+[2026-02-11T08:27:45.962Z] User ID: 69899ae669ce6dc21ab19dfd
+[2026-02-11T08:27:45.962Z] Body: {"numberOfPeople":12,"paymentMethod":"cash","busType":"standard","notes":" لا يوجد"}
+[2026-02-11T08:27:45.965Z] Trip found: جولة الجامع الأموي
+[2026-02-11T08:27:45.966Z] Seats Available (before): 40
+[2026-02-11T08:27:45.967Z] Creating booking object...
+[2026-02-11T08:27:45.967Z] Booking Data: {"userId":"69899ae669ce6dc21ab19dfd","tripId":"69887a8c63a4b47e08c05eb0","numberOfPeople":12,"paymentMethod":"cash","busType":"standard","notes":" لا يوجد","companions":[]}
+[2026-02-11T08:27:46.002Z] Booking created: 698c3d81cef84f2e1ad5ee3c
+[2026-02-11T08:27:46.014Z] Trip updated. New seats: 28
+[2026-02-11T08:27:46.016Z] --- Booking Request End ---

@@ -28,6 +28,10 @@
           <PhMapPin class="icon" />
           <span>Sites</span>
         </router-link>
+        <router-link to="/admin/companies" class="nav-item" active-class="active">
+          <PhBuildings class="icon" />
+          <span>Companies</span>
+        </router-link>
         <router-link to="/admin/revenue" class="nav-item" active-class="active">
           <PhCurrencyDollar class="icon" />
           <span>Revenue</span>
@@ -35,7 +39,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <a href="#" class="nav-item logout">
+        <a href="#" @click.prevent="logout" class="nav-item logout">
           <PhSignOut class="icon" />
           <span>Logout</span>
         </a>
@@ -46,8 +50,8 @@
     <main class="main-content">
       <header class="top-header">
         <div class="user-profile">
-          <span>Admin User</span>
-          <div class="avatar">A</div>
+          <span>{{ auth.user?.name || 'Admin' }}</span>
+          <div class="avatar">{{ (auth.user?.name || 'A').charAt(0) }}</div>
         </div>
       </header>
 
@@ -64,8 +68,19 @@ import {
   PhTicket, 
   PhMapPin, 
   PhSignOut,
-  PhCurrencyDollar
+  PhCurrencyDollar,
+  PhBuildings
 } from '@phosphor-icons/vue';
+import { useAuthStore } from "../store/auth";
+import { useRouter } from "vue-router";
+
+const auth = useAuthStore();
+const router = useRouter();
+
+function logout() {
+  auth.logout();
+  router.push("/login");
+}
 </script>
 
 <style scoped>
