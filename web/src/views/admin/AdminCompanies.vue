@@ -28,10 +28,10 @@
                 <span>{{ company.name }}</span>
               </div>
             </td>
-            <td>{{ company.userId?.name || 'غير معروف' }}</td>
-            <td>{{ company.userId?.email || '-' }}</td>
+            <td>{{ company.name || 'N/A' }}</td>
+            <td>{{ company.email || '-' }}</td>
             <td>
-              <span class="status-badge" :class="company.status">{{ company.status }}</span>
+              <span class="status-badge active">{{ company.role }}</span>
             </td>
             <td>{{ new Date(company.createdAt).toLocaleDateString('ar-EG') }}</td>
             <td>
@@ -85,8 +85,8 @@ async function confirmDelete(company) {
 </script>
 
 <style scoped>
-.admin-page { padding: 30px; }
-.page-header { margin-bottom: 30px; }
+.admin-page { padding: 30px; direction: rtl; }
+.page-header { margin-bottom: 30px; text-align: right; }
 .page-header h1 { font-size: 24px; color: #2c3e50; margin-bottom: 8px; }
 .page-header p { color: #7f8c8d; }
 
@@ -97,12 +97,8 @@ async function confirmDelete(company) {
   overflow: hidden;
 }
 
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th, .data-table td {
-  padding: 15px 20px;
-  text-align: right;
-  border-bottom: 1px solid #eee;
-}
+.data-table { width: 100%; border-collapse: collapse; direction: rtl; }
+.data-table th, .data-table td { padding: 15px 20px; text-align: right; border-bottom: 1px solid #eee; }
 .data-table th { background: #f8f9fa; color: #2c3e50; font-weight: 600; }
 .data-table tr:hover { background: #f8f9fa; }
 

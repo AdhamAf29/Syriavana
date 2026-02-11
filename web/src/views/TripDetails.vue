@@ -7,14 +7,14 @@
       <div class="body">
         <h2 style="margin:0 0 8px">{{ trip?.title }}</h2>
         
-        <div v-if="trip?.companyId" class="company-info" style="margin: 0 0 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
+        <div v-if="trip?.userId || trip?.companyId" class="company-info" style="margin: 0 0 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
           <div class="company-logo" style="width: 40px; height: 40px; background: #235789; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem;">
-            {{ trip.companyId.name.charAt(0) }}
+            {{ (trip.userId?.name || trip.companyId?.name || '?').charAt(0) }}
           </div>
           <div>
             <div style="font-size: 0.8rem; color: #666;">Organized by</div>
-            <router-link :to="'/companies/' + trip.companyId._id" style="color: #235789; font-weight: bold; text-decoration: none; font-size: 1rem;">
-              {{ trip.companyId.name }}
+            <router-link :to="'/companies/' + (trip.userId?._id || trip.userId?.id || trip.companyId?._id || trip.companyId?.id)" style="color: #235789; font-weight: bold; text-decoration: none; font-size: 1rem;">
+              {{ trip.userId?.name || trip.companyId?.name }}
             </router-link>
           </div>
         </div>

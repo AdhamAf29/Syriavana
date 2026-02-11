@@ -12,13 +12,13 @@
 
     <div v-else>
       <div class="grid" v-if="bookings.length > 0">
-        <div v-for="b in bookings" :key="b.id" class="card">
+        <div v-for="b in bookings" :key="b._id || b.id" class="card">
           <div class="header"><h3 class="card-title">رحلة {{ b.tripId?.title || 'غير متوفرة' }}</h3></div>
           <div class="body">
             <div class="booking-info" style="display:grid; gap:8px; margin-bottom:16px">
               <div style="display:flex; justify-content:space-between">
                 <span>📅 التاريخ:</span>
-                <strong>{{ formatDate(b.bookingDate) }}</strong>
+                <strong>{{ formatDate(b.createdAt || b.bookingDate) }}</strong>
               </div>
               <div style="display:flex; justify-content:space-between">
                 <span>👥 العدد:</span>
@@ -38,11 +38,11 @@
               </div>
               <div style="display:flex; justify-content:space-between; margin-top:4px; border-top:1px solid #eee; padding-top:8px">
                 <span>الحالة:</span>
-                <strong :style="{color: statusColor(b.bookingStatus)}">{{ stateAr(b.bookingStatus) }}</strong>
+                <strong :style="{color: statusColor(b.status || b.bookingStatus)}">{{ stateAr(b.status || b.bookingStatus) }}</strong>
               </div>
             </div>
             <div class="actions">
-              <button class="btn btn-outline" @click="cancel(b.id)" v-if="b.bookingStatus !== 'cancelled'">إلغاء الحجز</button>
+              <button class="btn btn-outline" @click="cancel(b._id || b.id)" v-if="(b.status || b.bookingStatus) !== 'cancelled'">إلغاء الحجز</button>
             </div>
           </div>
         </div>

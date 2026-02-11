@@ -57,8 +57,47 @@ router.delete("/companies/:id", async (req, res) => {
 
 router.get("/bookings", async (req, res) => {
   try {
-    const bookings = await Booking.find().populate('userId', 'name').populate('tripId', 'title');
+    const bookings = await Booking.find()
+      .populate('userId', 'name')
+      .populate({
+        path: 'tripId',
+        populate: [
+          { path: 'userId', select: 'name' },
+          { path: 'companyId', select: 'name' }
+        ]
+      })
+      .sort({ createdAt: -1 });
     res.json(bookings);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+router.get("/trips", async (req, res) => {
+  try {
+    const trips = await Trip.find()
+      .populate('userId', 'name')
+      .populate('companyId', 'name')
+      .sort({ createdAt: -1 });
+    res.json(trips);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+router.get("/sites", async (req, res) => {
+  try {
+    const sites = await Site.find().sort({ createdAt: -1 });
+    res.json(sites);
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
+
+router.get("/companies", async (req, res) => {
+  try {
+    const companies = await User.find({ role: 'company' }).select('-password');
+    res.json(companies);
   } catch (e) {
     res.status(500).json({ message: e.message });
   }

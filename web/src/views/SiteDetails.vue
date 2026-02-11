@@ -70,9 +70,9 @@ function translateProv(p){
 load();
 
 async function loadAll(){ const res = await api.get("/api/sites"); allSites.value = res.data; }
-function computeIndex(){ const idx = allSites.value.findIndex(s => String(s.id) === String(route.params.id)); currentIndex.value = idx >= 0 ? idx : 0; }
-function prevSite(){ const idx = (currentIndex.value - 1 + allSites.value.length) % allSites.value.length; const id = allSites.value[idx].id; router.push("/sites/" + id); }
-function nextSite(){ const idx = (currentIndex.value + 1) % allSites.value.length; const id = allSites.value[idx].id; router.push("/sites/" + id); }
+function computeIndex(){ const idx = allSites.value.findIndex(s => String(s._id || s.id) === String(route.params.id)); currentIndex.value = idx >= 0 ? idx : 0; }
+function prevSite(){ const idx = (currentIndex.value - 1 + allSites.value.length) % allSites.value.length; const id = allSites.value[idx]._id || allSites.value[idx].id; router.push("/sites/" + id); }
+function nextSite(){ const idx = (currentIndex.value + 1) % allSites.value.length; const id = allSites.value[idx]._id || allSites.value[idx].id; router.push("/sites/" + id); }
 watch(() => route.params.id, async () => { await load(); });
 </script>
 

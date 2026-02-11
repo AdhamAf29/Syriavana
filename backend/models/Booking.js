@@ -11,4 +11,12 @@ const bookingSchema = new mongoose.Schema({
   status: { type: String, default: 'pending' }
 }, { timestamps: true });
 
+bookingSchema.virtual('id').get(function() {
+  return this._id.toHexString();
+});
+
+bookingSchema.set('toJSON', {
+  virtuals: true
+});
+
 export default mongoose.model("Booking", bookingSchema);

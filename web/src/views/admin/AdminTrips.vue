@@ -27,11 +27,11 @@
           <tr v-for="trip in trips" :key="trip._id">
             <td>
               <div class="trip-info">
-                <div class="trip-img" :style="{ backgroundImage: `url(${trip.images?.[0] || '/images/placeholder.jpg'})` }"></div>
+                <img :src="trip.images?.[0] || '/images/placeholder.jpg'" alt="" style="width:40px; height:40px; border-radius:6px; object-fit:cover;">
                 <span>{{ trip.title }}</span>
               </div>
             </td>
-            <td>{{ trip.companyId?.name || 'N/A' }}</td>
+            <td>{{ trip.userId?.name || trip.companyId?.name || 'N/A' }}</td>
             <td>${{ trip.price }}</td>
             <td>{{ new Date(trip.startDate).toLocaleDateString() }}</td>
             <td>
@@ -83,10 +83,12 @@ onMounted(async () => {
   overflow-x: auto;
 }
 
-.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.admin-page { direction: rtl; }
+
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; direction: rtl; }
 .data-table th, .data-table td {
   padding: 15px 20px;
-  text-align: left;
+  text-align: right;
   border-bottom: 1px solid #eee;
 }
 .data-table th { background: #f8f9fa; color: #2c3e50; font-weight: 600; }

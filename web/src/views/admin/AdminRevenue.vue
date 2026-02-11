@@ -50,7 +50,7 @@
             <tr v-for="item in bookings" :key="item._id">
               <td>{{ new Date(item.createdAt).toLocaleDateString() }}</td>
               <td>{{ item.tripId?.title || 'Unknown Trip' }}</td>
-              <td>{{ item.tripId?.companyId?.name || 'Unknown Company' }}</td>
+              <td>{{ item.tripId?.userId?.name || item.tripId?.companyId?.name || 'Unknown Company' }}</td>
               <td>{{ item.userId?.name || 'Unknown User' }}</td>
               <td>${{ ((item.tripId?.price || 0) * item.numberOfPeople).toLocaleString() }}</td>
               <td>
@@ -98,6 +98,7 @@ onMounted(async () => {
 <style scoped>
 .admin-page {
   padding: 20px;
+  direction: rtl;
 }
 
 .page-header {
@@ -195,22 +196,19 @@ onMounted(async () => {
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  direction: rtl;
+}
+
+.data-table th, .data-table td {
+  text-align: right;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
 }
 
 .data-table th {
-  text-align: left;
-  padding: 12px 16px;
   background: #f8f9fa;
-  color: #666;
+  color: #2c3e50;
   font-weight: 600;
-  font-size: 14px;
-}
-
-.data-table td {
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  color: #333;
 }
 
 .badge {

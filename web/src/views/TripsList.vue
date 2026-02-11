@@ -14,13 +14,13 @@
 
     <h2>الرحلات</h2>
     <div class="grid">
-      <div v-for="t in filteredTrips" :key="t.id" :class="['card','trips-card', t.discount?.active ? 'offer-card' : '']">
+      <div v-for="t in filteredTrips" :key="t._id || t.id" :class="['card','trips-card', t.discount?.active ? 'offer-card' : '']">
         <div class="header">
           <h3 class="card-title">{{ t.title }}</h3>
-          <div v-if="t.companyId" class="company-link" style="margin-top: 5px; font-size: 0.9em;">
+          <div v-if="t.userId || t.companyId" class="company-link" style="margin-top: 5px; font-size: 0.9em;">
             <span style="color: #666;">Organized by: </span>
-            <router-link :to="'/companies/' + t.companyId._id" style="color: #235789; font-weight: 600; text-decoration: none;">
-              {{ t.companyId.name }}
+            <router-link :to="'/companies/' + (t.userId?._id || t.userId?.id || t.companyId?._id || t.companyId?.id)" style="color: #235789; font-weight: 600; text-decoration: none;">
+              {{ t.userId?.name || t.companyId?.name }}
             </router-link>
           </div>
         </div>
@@ -33,8 +33,8 @@
           <p>الانطلاق: {{ t.departurePoint }}</p>
           <p v-if="t.discount?.active"><span class="badge">خصم {{ t.discount.amount }}%</span></p>
           <div class="actions">
-            <router-link class="btn btn-outline" :to="'/trips/' + t.id">تفاصيل</router-link>
-            <button class="btn btn-primary" @click="bookNow(t.id)">احجز الآن</button>
+            <router-link class="btn btn-outline" :to="'/trips/' + (t._id || t.id)">تفاصيل</router-link>
+            <button class="btn btn-primary" @click="bookNow(t._id || t.id)">احجز الآن</button>
           </div>
         </div>
       </div>

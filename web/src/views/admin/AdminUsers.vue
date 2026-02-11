@@ -61,7 +61,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-header { margin-bottom: 30px; }
+.admin-page { direction: rtl; }
+.page-header { margin-bottom: 30px; text-align: right; }
 .page-header h1 { font-size: 24px; color: #235789; margin-bottom: 8px; }
 .page-header p { color: #7f8c8d; }
 
@@ -73,10 +74,10 @@ onMounted(async () => {
   overflow-x: auto;
 }
 
-.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; direction: rtl; }
 .data-table th, .data-table td {
   padding: 15px 20px;
-  text-align: left;
+  text-align: right;
   border-bottom: 1px solid #eee;
 }
 .data-table th { background: #f8f9fa; color: #2c3e50; font-weight: 600; }

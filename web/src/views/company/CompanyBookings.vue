@@ -51,7 +51,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useAuthStore } from "../../store/auth";
-import axios from "axios";
+import api from "../../api";
 
 const auth = useAuthStore();
 const bookings = ref([]);
@@ -59,9 +59,7 @@ const loading = ref(true);
 
 onMounted(async () => {
   try {
-    const res = await axios.get("http://localhost:3001/api/bookings/company", {
-      headers: { Authorization: `Bearer ${auth.token}` }
-    });
+    const res = await api.get("/api/bookings/company");
     bookings.value = res.data;
   } catch (e) {
     console.error(e);

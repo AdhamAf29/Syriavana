@@ -188,8 +188,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.admin-page {
+  padding: 20px;
+  direction: rtl;
+}
+
 .page-header {
   margin-bottom: 30px;
+  text-align: right;
 }
 .page-header h1 {
   color: #235789;
@@ -202,18 +208,22 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .stat-card {
-  background-color: white;
+  background: white;
   padding: 20px;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
   display: flex;
   align-items: center;
-  gap: 16px;
-  transition: transform 0.2s;
+  gap: 15px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  flex-direction: row;
+}
+
+.stat-info {
+  text-align: right;
 }
 
 .stat-card:hover {

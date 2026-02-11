@@ -26,7 +26,7 @@
           <tr v-for="site in sites" :key="site._id">
             <td>
               <div class="site-info">
-                <div class="site-img" :style="{ backgroundImage: `url(${site.images?.[0] || '/images/placeholder.jpg'})` }"></div>
+                <img :src="site.images?.[0] || '/images/placeholder.jpg'" alt="" style="width:40px; height:40px; border-radius:6px; object-fit:cover;">
                 <span>{{ site.name }}</span>
               </div>
             </td>
@@ -79,10 +79,12 @@ onMounted(async () => {
   overflow-x: auto;
 }
 
-.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.admin-page { direction: rtl; }
+
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; direction: rtl; }
 .data-table th, .data-table td {
   padding: 15px 20px;
-  text-align: left;
+  text-align: right;
   border-bottom: 1px solid #eee;
 }
 .data-table th { background: #f8f9fa; color: #2c3e50; font-weight: 600; }

@@ -7,7 +7,7 @@
       <button class="btn btn-accent" @click="load">تصفية</button>
     </div>
     <div class="grid">
-      <div v-for="s in sites" :key="s.id" class="card sites-card">
+      <div v-for="s in sites" :key="s._id || s.id" class="card sites-card">
         <div class="header">
           <h3 class="card-title">{{ s.nameAr || s.name }}</h3>
         </div>
@@ -17,7 +17,7 @@
         <div class="body">
           <p class="card-desc">{{ s.descriptionAr || s.description }}</p>
           <div class="actions">
-            <router-link class="btn btn-outline" :to="'/sites/' + s.id">تفاصيل</router-link>
+            <router-link class="btn btn-outline" :to="'/sites/' + (s._id || s.id)">تفاصيل</router-link>
           </div>
         </div>
       </div>
